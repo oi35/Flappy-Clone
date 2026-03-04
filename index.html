@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Flappy Clone</title>
+    <style>
+      :root {
+        --bg-1: #8fd3ff;
+        --bg-2: #e8f8ff;
+        --card: #ffffffdd;
+        --ink: #14334a;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+        background: radial-gradient(circle at 20% 20%, var(--bg-2), var(--bg-1));
+        color: var(--ink);
+      }
+
+      .shell {
+        width: min(94vw, 520px);
+        padding: 14px;
+        border-radius: 18px;
+        background: var(--card);
+        box-shadow: 0 16px 44px #0000001f;
+      }
+
+      .head {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-bottom: 10px;
+      }
+
+      .title {
+        margin: 0;
+        font-size: clamp(1rem, 1.8vw + 0.8rem, 1.35rem);
+      }
+
+      .hint {
+        margin: 0;
+        font-size: 0.88rem;
+        opacity: 0.82;
+      }
+
+      canvas {
+        display: block;
+        width: 100%;
+        border-radius: 14px;
+        border: 2px solid #ffffffaa;
+        box-shadow: inset 0 0 0 1px #00000010;
+        touch-action: manipulation;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="shell">
+      <div class="head">
+        <h1 class="title">Flappy Clone</h1>
+        <p class="hint">Space / Click / Touch</p>
+      </div>
+      <canvas id="game" width="400" height="640"></canvas>
+    </main>
+
+    <script src="./src/engine/core.js"></script>
+    <script src="./src/game/flappy.js"></script>
+    <script src="./src/main.js"></script>
+  </body>
+</html>
