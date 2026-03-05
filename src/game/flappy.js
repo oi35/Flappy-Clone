@@ -9,6 +9,7 @@
   var clamp = MiniEngine.clamp;
   var circleRectIntersect = MiniEngine.circleRectIntersect;
 
+  // Gameplay tuning constants.
   var WORLD_WIDTH = 400;
   var WORLD_HEIGHT = 640;
   var GROUND_HEIGHT = 90;
@@ -22,10 +23,12 @@
   var BIRD_RADIUS = 15;
   var BEST_KEY = "mini_engine_flappy_best";
 
+  // Uniform random helper for spawn parameter generation.
   function randomRange(min, max) {
     return min + Math.random() * (max - min);
   }
 
+  // Defensive storage read: gameplay should continue even if storage is blocked.
   function safeReadBest() {
     try {
       var value = globalScope.localStorage.getItem(BEST_KEY);
@@ -37,6 +40,7 @@
     }
   }
 
+  // Persist best score when storage is available.
   function safeWriteBest(value) {
     try {
       globalScope.localStorage.setItem(BEST_KEY, String(value));
@@ -66,6 +70,7 @@
 
   function createFlappyGame(engine) {
     var world = engine.world;
+    // mode: ready -> running -> gameover.
     var state = {
       mode: "ready",
       score: 0,
@@ -76,6 +81,7 @@
 
     var bird = makeBird(world);
 
+    // Reset round state while keeping best score.
     function resetRound() {
       var i = 0;
       var pipes = world.query(function isPipe(entity) {
@@ -102,6 +108,7 @@
       state.flashTime = 0;
     }
 
+    // Any accepted flap input should behave identically.
     function flapRequested(input) {
       return (
         input.isPressed("Space") ||
@@ -111,6 +118,7 @@
       );
     }
 
+    // Spawn one top + one bottom pipe with a random gap center.
     function spawnPipePair() {
       var minGapCenter = 140;
       var maxGapCenter = WORLD_HEIGHT - GROUND_HEIGHT - 140;
@@ -124,6 +132,7 @@
       makePipe(world, pipeX, bottomY, PIPE_WIDTH, bottomHeight, false);
     }
 
+    // Enter gameover once and update best score if needed.
     function endGame() {
       if (state.mode === "gameover") return;
       state.mode = "gameover";
@@ -138,6 +147,7 @@
     world
       .addSystem(
         {
+          // Bird control + vertical physics + round flow.
           update: function updateBird(currentWorld, dt, currentEngine) {
             var position = bird.get("position");
             var velocity = bird.get("velocity");
@@ -190,6 +200,7 @@
       )
       .addSystem(
         {
+          // Pipe scrolling, score counting, and offscreen cleanup.
           update: function updatePipes(currentWorld, dt) {
             var pipes = currentWorld.query(function isPipe(entity) {
               return entity.hasTag("pipe");
@@ -225,6 +236,7 @@
       )
       .addSystem(
         {
+          // Bird-vs-pipe collision test.
           update: function updateCollisions(currentWorld) {
             if (state.mode !== "running") return;
 
@@ -253,6 +265,7 @@
       )
       .addSystem(
         {
+          // Full scene render pass and UI overlays.
           render: function renderScene(currentWorld, ctx) {
             var sky = ctx.createLinearGradient(0, 0, 0, WORLD_HEIGHT);
             sky.addColorStop(0, "#92dfff");

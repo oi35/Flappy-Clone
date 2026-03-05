@@ -1,10 +1,12 @@
 (function initMiniEngine(globalScope) {
   "use strict";
 
+  // Small math helper shared by movement and collision code.
   function clamp(value, min, max) {
     return Math.max(min, Math.min(max, value));
   }
 
+  // Axis-aligned rectangle overlap test.
   function rectIntersect(a, b) {
     return (
       a.x < b.x + b.w &&
@@ -14,6 +16,7 @@
     );
   }
 
+  // Circle vs axis-aligned rectangle overlap test.
   function circleRectIntersect(circle, rect) {
     var closestX = clamp(circle.x, rect.x, rect.x + rect.w);
     var closestY = clamp(circle.y, rect.y, rect.y + rect.h);
@@ -22,6 +25,7 @@
     return dx * dx + dy * dy < circle.r * circle.r;
   }
 
+  // Minimal ECS entity: data in components, behavior in systems.
   function Entity(id) {
     this.id = id;
     this.active = true;
@@ -51,6 +55,7 @@
     return this.components.has(name);
   };
 
+  // World stores all entities and ordered systems.
   function World() {
     this.entities = [];
     this.systems = [];
@@ -71,6 +76,7 @@
   World.prototype.addSystem = function addSystem(system, priority) {
     var resolvedPriority = typeof priority === "number" ? priority : 0;
     this.systems.push({ priority: resolvedPriority, system: system });
+    // Lower priority value runs earlier.
     this.systems.sort(function byPriority(a, b) {
       return a.priority - b.priority;
     });
@@ -102,6 +108,7 @@
     }
   };
 
+  // Apply pending destroys after systems finish to keep iteration stable.
   World.prototype.flushDestroyed = function flushDestroyed() {
     var self = this;
     if (this.pendingDestroy.size === 0) return;
@@ -111,6 +118,7 @@
     this.pendingDestroy.clear();
   };
 
+  // Normalize browser key data to engine-friendly codes.
   function normalizeCodes(event) {
     var codes = [];
 
@@ -130,6 +138,7 @@
     return Array.from(new Set(codes));
   }
 
+  // Input tracks continuous state (down) and per-frame edges (pressed/released).
   function Input(targetElement) {
     this.keysDown = new Set();
     this.keysPressed = new Set();
@@ -186,6 +195,7 @@
     targetElement.addEventListener("touchend", this.handleTapEnd, { passive: true });
   }
 
+  // Called once per simulation step to clear one-frame events.
   Input.prototype.beginFrame = function beginFrame() {
     this.keysPressed.clear();
     this.keysReleased.clear();
@@ -203,6 +213,7 @@
     return this.keysReleased.has(code);
   };
 
+  // Engine owns the fixed-step simulation loop and rendering.
   function Engine(options) {
     var config = options || {};
     this.canvas = config.canvas;
@@ -251,6 +262,7 @@
     if (frameTime > this.maxFrameTime) frameTime = this.maxFrameTime;
     this.accumulator += frameTime;
 
+    // Run deterministic fixed updates, then render with interpolation alpha.
     while (this.accumulator >= this.fixedStep) {
       this.world.update(this.fixedStep, this);
       this.accumulator -= this.fixedStep;

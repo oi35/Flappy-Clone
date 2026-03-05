@@ -1,6 +1,7 @@
 (function startGame(globalScope) {
   "use strict";
 
+  // Bootstrap game modules exposed by previous script tags.
   var MiniEngine = globalScope.MiniEngine;
   var FlappyGame = globalScope.FlappyGame;
 
@@ -21,6 +22,7 @@
   FlappyGame.createFlappyGame(engine);
   engine.start();
 
+  // Scale the render canvas to the current viewport while preserving aspect ratio.
   function fitCanvas() {
     var viewportW = window.innerWidth;
     var viewportH = window.innerHeight;
@@ -36,6 +38,7 @@
       renderW = renderH * ratio;
     }
 
+    // Keep CSS size independent from internal render resolution.
     canvas.style.width = String(renderW) + "px";
     canvas.style.height = String(renderH) + "px";
     shell.style.width = String(Math.max(280, renderW + 28)) + "px";
